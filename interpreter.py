@@ -71,26 +71,26 @@ def interpret(mem, labels, commands, inputs):
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                x = x + get_val_from_mem(mem, addr)
+                x = add_raw(x, get_val_from_mem(mem, addr))
             else:
                 i = get_index(m)
-                x = x + get_val_from_mem(mem, i)
+                x = add_raw(x, get_val_from_mem(mem, i))
         elif "SUB" in cmd:
             m = sub.match(cmd)
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                x = x - get_val_from_mem(mem, addr)
+                x = sub_raw(x, get_val_from_mem(mem, addr))
             else:
                 i = get_index(m)
-                x = x - get_val_from_mem(mem, i)
+                x = sub_raw(x, get_val_from_mem(mem, i))
         elif "JUMPZ" in cmd:
-            if x == 0:
+            if cmp_raw(x, "eq", 0):
                 m = jpz.match(cmd)
                 lbl = m.group("label")
                 ptr = labels[lbl]
         elif "JUMPN" in cmd:
-            if x < 0:
+            if cmp_raw(x, "lt", 0):
                 m = jpn.match(cmd)
                 lbl = m.group("label")
                 ptr = labels[lbl]
@@ -103,22 +103,22 @@ def interpret(mem, labels, commands, inputs):
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                mem[addr] = get_val_from_mem(mem, addr) + 1
+                mem[addr] = add_raw(get_val_from_mem(mem, addr), 1)
                 x = get_val_from_mem(mem, addr)
             else:
                 i = get_index(m)
-                mem[i] = get_val_from_mem(mem, i) + 1
+                mem[i] = add_raw(get_val_from_mem(mem, i), 1)
                 x = get_val_from_mem(mem, i)
         elif "BUMPDN" in cmd:
             m = bdn.match(cmd)
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                mem[addr] = get_val_from_mem(mem, addr) - 1
+                mem[addr] = sub_raw(get_val_from_mem(mem, addr), 1)
                 x = get_val_from_mem(mem, addr)
             else:
                 i = get_index(m)
-                mem[i] = get_val_from_mem(mem, i) - 1
+                mem[i] = sub_raw(get_val_from_mem(mem, i), 1)
                 x = get_val_from_mem(mem, i)
         elif "COPYTO" in cmd:
             m = cpt.match(cmd)
@@ -145,9 +145,55 @@ def interpret(mem, labels, commands, inputs):
     print_log("interpreted in %d steps with %d commands" % (steps, len(commands)))
     return outputs
 
+def add_raw(left, right):
+    if type(left) != type(right):
+        print_error("Unable to add values of different types %s and %s" % (type(left), type(right)))
+        exit(1)
+    try:
+        return int(left) + int(right)
+    except ValueError:
+        print_error("Unable to add characters together")
+        exit(1)
+
+def sub_raw(left, right):
+    if type(left) != type(right):
+        print_error("Unable to sub values of different types %s and %s" % (type(left), type(right)))
+        exit(1)
+    try:
+        return int(left) - int(right)
+    except ValueError:
+        return ord(left) - ord(right)
+
+def cmp_raw(left, op, right):
+    try:
+        left = int(left)
+    except ValueError:
+        left = ord(left)
+    try:
+        right = int(right)
+    except ValueError:
+        right = ord(right)
+    return compare(left, op, right)
+
+def compare(left, op, right):
+    if op == "eq":
+        return left == right
+    elif op == "ne":
+        return left != right
+    elif op == "lt":
+        return left < right
+    elif op == "gt":
+        return left > right
+    elif op == "lte":
+        return left <= right
+    elif op == "gte":
+        return left >= right
+    print_error("Invalid operation %s" % op)
+    exit(1)
+
 def get_val_from_mem(mem, i):
     val = mem[i]
-    return get_raw_val(val)
+    return val
 
 def get_index(m):
     return int(m.group("index"))
@@ -159,19 +205,6 @@ def get_raw_val(val):
     if val is not None :
         try:
             return int(val)
-        except ValueError:
-            if val.isalpha():
-                return ord(val)
-            return int(val)
-    return None
-
-def get_display_val(val):
-    if val is not None:
-        try:
-            if chr(val).isalpha():
-                return chr(val)
-            else:
-                return ord(chr(val))
         except ValueError:
             return val
     return None
@@ -240,7 +273,7 @@ if __name__ == '__main__':
     mem = init_vm(memspace, constants)
     commands = read_commands(cmd_filename)
     inputs = read_inputs(in_filename)
-    print("inputs: %s" % [get_display_val(val) for val in inputs])
+    print("inputs: %s" % inputs)
     outputs = run_commands(mem, commands, inputs)
-    print("outputs: %s" % [get_display_val(val) for val in outputs])
+    print("outputs: %s" % outputs)
 
