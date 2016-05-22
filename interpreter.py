@@ -11,17 +11,14 @@ def init_vm(memspace, consts):
     print_log("init vm...")
     print_log("memspace: %d" % memspace)
     mem = [None] * memspace
-    glob_consts = {}
     index = memspace - 1
     while consts:
         const = consts.pop(0)
         mem[index] = const
-        glob_consts[const] = index
         index = index - 1
     print_log("mem: %s" % mem)
-    print_log("consts: %s" % glob_consts)
     print_log("init done...")
-    return mem, glob_consts
+    return mem
 
 def init_labels(commands):
     labels = {}
@@ -35,14 +32,14 @@ def init_labels(commands):
     print_log("init labels done...")
     return labels
         
-def run_commands(mem, glob_consts, commands, inputs):
+def run_commands(mem, commands, inputs):
     print_log("start running commands...")
     labels = init_labels(commands)
-    outputs = interpret(mem, glob_consts, labels, commands, inputs)
+    outputs = interpret(mem, labels, commands, inputs)
     print_log("end running commands...")
     return outputs
 
-def interpret(mem, glob_consts, labels, commands, inputs):
+def interpret(mem, labels, commands, inputs):
     outputs = []
     steps = 0
     print_log("interpreting...")
@@ -240,10 +237,10 @@ if __name__ == '__main__':
     check_file(in_filename)
     verbose = True if args.verbose else False
     memspace, constants = read_init(init_filename)
-    mem, glob_consts = init_vm(memspace, constants)
+    mem = init_vm(memspace, constants)
     commands = read_commands(cmd_filename)
     inputs = read_inputs(in_filename)
     print("inputs: %s" % [get_display_val(val) for val in inputs])
-    outputs = run_commands(mem, glob_consts, commands, inputs)
+    outputs = run_commands(mem, commands, inputs)
     print("outputs: %s" % [get_display_val(val) for val in outputs])
 
