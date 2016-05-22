@@ -84,7 +84,7 @@ Otherwise, the interpreter will just print the input and output.
 
 # Known Issues
 
-1. I still can't quite get character conversion to work properly.
+~~1. I still can't quite get character conversion to work properly.~~ (*See [commit 5512deb71251682f312bbff5d30940e9a69ef2c6](https://github.com/gohkhoonhiang/humanresourcemachine/commit/5512deb71251682f312bbff5d30940e9a69ef2c6)*)
 2. I need to find out how to terminate the program properly without having the `END` instruction.
 
 
