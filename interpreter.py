@@ -71,19 +71,19 @@ def interpret(mem, labels, commands, inputs):
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                x = x + mem[addr]
+                x = x + get_val_from_mem(mem, addr)
             else:
                 i = get_index(m)
-                x = x + mem[i]
+                x = x + get_val_from_mem(mem, i)
         elif "SUB" in cmd:
             m = sub.match(cmd)
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                x = x - mem[addr]
+                x = x - get_val_from_mem(mem, addr)
             else:
                 i = get_index(m)
-                x = x - mem[i]
+                x = x - get_val_from_mem(mem, i)
         elif "JUMPZ" in cmd:
             if x == 0:
                 m = jpz.match(cmd)
@@ -103,22 +103,22 @@ def interpret(mem, labels, commands, inputs):
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                mem[addr] = mem[addr] + 1
-                x = mem[addr]
+                mem[addr] = get_val_from_mem(mem, addr) + 1
+                x = get_val_from_mem(mem, addr)
             else:
                 i = get_index(m)
-                mem[i] = mem[i] + 1
+                mem[i] = get_val_from_mem(mem, i) + 1
                 x = get_val_from_mem(mem, i)
         elif "BUMPDN" in cmd:
             m = bdn.match(cmd)
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                mem[addr] = mem[addr] - 1
-                x = mem[addr]
+                mem[addr] = get_val_from_mem(mem, addr) - 1
+                x = get_val_from_mem(mem, addr)
             else:
                 i = get_index(m)
-                mem[i] = mem[i] - 1
+                mem[i] = get_val_from_mem(mem, i) - 1
                 x = get_val_from_mem(mem, i)
         elif "COPYTO" in cmd:
             m = cpt.match(cmd)
@@ -134,7 +134,7 @@ def interpret(mem, labels, commands, inputs):
             if m.group("addr"):
                 i = get_addr(m)
                 addr = get_val_from_mem(mem, i)
-                x = mem[addr]
+                x = get_val_from_mem(mem, addr)
             else:
                 i = get_index(m)
                 x = get_val_from_mem(mem, i)
