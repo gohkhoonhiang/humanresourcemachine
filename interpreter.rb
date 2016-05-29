@@ -4,7 +4,7 @@ require 'optparse'
 
 class HRMInterpreter
   attr_accessor :verbose
-  attr_reader :memspace, :mem, :constants, :commands, :inputs
+  attr_reader :memspace, :mem, :constants, :commands, :inputs, :labels
 
   def initialize
     @verbose = false
@@ -13,6 +13,7 @@ class HRMInterpreter
     @constants = []
     @commands = []
     @inputs = []
+    @labels = {}
   end
 
   def init_vm
@@ -28,6 +29,18 @@ class HRMInterpreter
     print_log("init done...")
   end
 
+  def init_labels
+    @commands.each_with_index do |cmd,index|
+      m = cmd.match(/(?<label>\w+):/)
+      if !m.nil?
+        lbl = m['label']
+        @labels[lbl] = index  
+      end
+    end
+    print_log(format("labels: %s", labels))
+    print_log("init labels done...")
+  end
+        
   def read_init(file_name)
     print_log("read_init...")
     lines = []
@@ -75,6 +88,8 @@ class HRMInterpreter
     print @inputs
     puts
     print @commands
+    puts
+    print @labels
     puts
   end
 end
@@ -159,6 +174,7 @@ if __FILE__ == $0
   interpreter.read_commands(parser.cmd_filename)
   interpreter.read_inputs(parser.in_filename)
   interpreter.init_vm
+  interpreter.init_labels
 
   print interpreter.to_s
 end 
