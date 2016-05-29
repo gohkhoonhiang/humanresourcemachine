@@ -1,62 +1,71 @@
 #!/usr/bin/ruby
 
-# HACK: Need to refactor into class probably
 require 'optparse'
 
-verbose = false
+class HRMInterpreter
+  attr_accessor :verbose
 
-def init_vm(memspace, consts)
-  print_log("init vm...")
-  print_log(format("memspace: %d", memspace))
-  mem = [nil] * memspace
-  index = memspace - 1
-  consts.each do |const| 
-    mem[index] = const
-    index = index - 1
+  def initialize
+    self.verbose = false
   end
-  print_log(format("mem: %s", mem))
-  print_log("init done...")
-  mem
-end
 
-def read_init(file_name)
-  lines = []
-  memspace = nil
-  constants = []
-  lines = File.readlines(file_name)
-  memspace = lines.first.strip.to_i
-  memspace = get_raw_val(lines.first.strip)
-  if lines.length == 2
-    lines[1].strip.split(" ").each { |val| constants.push(get_raw_val(val)) }
-  end
-  [memspace, constants]
-end
-
-def read_commands(file_name)
-  commands = []
-  commands = File.readlines(file_name)
-  commands.each { |cmd| cmd.sub!("\t", " ") }
-  commands
-end
-
-def read_inputs(file_name)
-  line = ""
-  line = File.read(file_name)
-  inputs = []
-  line.strip.split(" ").each { |val| inputs.push(get_raw_val(val)) }
-  inputs
-end
-
-def get_raw_val(val)
-  raw_val = nil
-  if !val.nil?
-    if !val.match(/\d+/).nil?
-      raw_val = val.to_i
-    else
-      raw_val = val
+  def init_vm(memspace, consts)
+    print_log("init vm...")
+    print_log(format("memspace: %d", memspace))
+    mem = [nil] * memspace
+    index = memspace - 1
+    consts.each do |const| 
+      mem[index] = const
+      index = index - 1
     end
+    print_log(format("mem: %s", mem))
+    print_log("init done...")
+    mem
   end
-  raw_val
+
+  def read_init(file_name)
+    print_log("read_init...")
+    lines = []
+    memspace = nil
+    constants = []
+    lines = File.readlines(file_name)
+    memspace = lines.first.strip.to_i
+    memspace = get_raw_val(lines.first.strip)
+    if lines.length == 2
+      lines[1].strip.split(" ").each { |val| constants.push(get_raw_val(val)) }
+    end
+    [memspace, constants]
+  end
+
+  def read_commands(file_name)
+    print_log("read_commands...")
+    commands = []
+    commands = File.readlines(file_name)
+    commands.each { |cmd| cmd.sub!("\t", " ") }
+    commands
+  end
+
+  def read_inputs(file_name)
+    print_log("read_inputs...")
+    line = ""
+    line = File.read(file_name)
+    inputs = []
+    line.strip.split(" ").each { |val| inputs.push(get_raw_val(val)) }
+    inputs
+  end
+
+  def get_raw_val(val)
+    raw_val = if !val.nil?
+                !val.match(/\d+/).nil? ? val.to_i : val
+              else
+                nil
+              end
+    raw_val
+  end
+
+  def print_log(line)
+    puts line if verbose
+  end
 end
 
 def check_required(options)
@@ -73,12 +82,6 @@ def check_required(options)
   if !required.empty?
     puts "error: the following arguments are required: #{required.join(', ')}"
     exit
-  end
-end
-
-def print_log(line)
-  if verbose
-    puts line
   end
 end
 
@@ -129,7 +132,10 @@ if __FILE__ == $0
   check_file(options[:in_filename])
   verbose = options[:verbose]
 
-  memspace, constants = read_init(options[:init_filename])
-  commands = read_commands(options[:cmd_filename])
-  inputs = read_inputs(options[:in_filename])
+  interpreter = HRMInterpreter.new
+  interpreter.verbose = verbose
+
+  memspace, constants = interpreter.read_init(options[:init_filename])
+  commands = interpreter.read_commands(options[:cmd_filename])
+  inputs = interpreter.read_inputs(options[:in_filename])
 end 
