@@ -6,7 +6,7 @@ class HRMInterpreter
   attr_accessor :verbose
 
   def initialize
-    self.verbose = false
+    @verbose = false
   end
 
   def init_vm(memspace, consts)
