@@ -65,6 +65,59 @@ class HRMInterpreter
     line.strip.split(" ").each { |val| @inputs.push(get_raw_val(val)) }
   end
 
+  def add_raw(left, right)
+    lm = left.match(/\d+/)
+    rm = right.match(/\d+/)
+    if lm.nil? or rm.nil?
+      print_error(format("Unable to add values of non-integer types"))
+      exit
+    end
+    left.to_i + right.to_i
+  end
+
+  def sub_raw(left, right)
+    result = 0
+    lm = left.match(/[^\d]+/)
+    rm = right.match(/[^\d]+/)
+    if lm.nil? and rm.nil?
+      result = left.to_i - right.to_i
+    elsif !lm.nil? and !rm.nil?
+      result = left.ord - right.ord
+    else
+      print_error(format("Unable to sub values of different types"))
+      exit
+    end
+    result
+  end
+
+  def cmp_raw(left, op, right)
+    lm = left.match(/[^\d]+/)
+    rm = right.match(/[^\d]+/)
+    left = lm.nil? ? left.to_i : left.ord
+    right = rm.nil? ? right.to_i : right.ord
+    compare(left, op, right)
+  end
+
+  def compare(left, op, right)
+    result =
+      case op
+      when "eq" then left == right
+      when "ne" then left != right
+      when "lt" then left < right
+      when "gt" then left > right
+      when "lte" then left <= right
+      when "gte" then left >= right
+      else
+        print_error(format("Invalid operation %s", op))
+        exit
+      end
+    result
+  end
+
+  def get_val_from_mem(i)
+    @mem[i]
+  end
+
   def get_raw_val(val)
     raw_val = if !val.nil?
                 !val.match(/\d+/).nil? ? val.to_i : val
@@ -76,6 +129,10 @@ class HRMInterpreter
 
   def print_log(line)
     puts line if verbose
+  end
+
+  def print_error(line)
+    puts format("Error: %s", line)
   end
 
   def to_s
