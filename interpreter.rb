@@ -4,54 +4,52 @@ require 'optparse'
 
 class HRMInterpreter
   attr_accessor :verbose
+  attr_reader :memspace, :mem, :constants, :commands, :inputs
 
   def initialize
     @verbose = false
+    @memspace = 0
+    @mem = []
+    @constants = []
+    @commands = []
+    @inputs = []
   end
 
-  def init_vm(memspace, consts)
+  def init_vm
     print_log("init vm...")
-    print_log(format("memspace: %d", memspace))
-    mem = [nil] * memspace
-    index = memspace - 1
-    consts.each do |const| 
-      mem[index] = const
+    print_log(format("memspace: %d", @memspace))
+    @mem = [nil] * @memspace
+    index = @memspace - 1
+    @constants.each do |const| 
+      @mem[index] = const
       index = index - 1
     end
-    print_log(format("mem: %s", mem))
+    print_log(format("mem: %s", @mem))
     print_log("init done...")
-    mem
   end
 
   def read_init(file_name)
     print_log("read_init...")
     lines = []
-    memspace = nil
-    constants = []
     lines = File.readlines(file_name)
-    memspace = lines.first.strip.to_i
-    memspace = get_raw_val(lines.first.strip)
+    @memspace = lines.first.strip.to_i
+    @memspace = get_raw_val(lines.first.strip)
     if lines.length == 2
-      lines[1].strip.split(" ").each { |val| constants.push(get_raw_val(val)) }
+      lines[1].strip.split(" ").each { |val| @constants.push(get_raw_val(val)) }
     end
-    [memspace, constants]
   end
 
   def read_commands(file_name)
     print_log("read_commands...")
-    commands = []
-    commands = File.readlines(file_name)
-    commands.each { |cmd| cmd.sub!("\t", " ") }
-    commands
+    @commands = File.readlines(file_name)
+    @commands.each { |cmd| cmd.sub!("\t", " ") }
   end
 
   def read_inputs(file_name)
     print_log("read_inputs...")
     line = ""
     line = File.read(file_name)
-    inputs = []
-    line.strip.split(" ").each { |val| inputs.push(get_raw_val(val)) }
-    inputs
+    line.strip.split(" ").each { |val| @inputs.push(get_raw_val(val)) }
   end
 
   def get_raw_val(val)
@@ -65,6 +63,19 @@ class HRMInterpreter
 
   def print_log(line)
     puts line if verbose
+  end
+
+  def to_s
+    print @mem
+    puts
+    print @memspace
+    puts
+    print @constants
+    puts
+    print @inputs
+    puts
+    print @commands
+    puts
   end
 end
 
@@ -144,7 +155,10 @@ if __FILE__ == $0
   interpreter = HRMInterpreter.new
   interpreter.verbose = parser.verbose
 
-  memspace, constants = interpreter.read_init(parser.init_filename)
-  commands = interpreter.read_commands(parser.cmd_filename)
-  inputs = interpreter.read_inputs(parser.in_filename)
+  interpreter.read_init(parser.init_filename)
+  interpreter.read_commands(parser.cmd_filename)
+  interpreter.read_inputs(parser.in_filename)
+  interpreter.init_vm
+
+  print interpreter.to_s
 end 
