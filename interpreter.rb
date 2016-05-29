@@ -68,74 +68,83 @@ class HRMInterpreter
   end
 end
 
-def check_required(options)
-  required = []
-  if options[:init_filename].nil?
-    required.push("--init")
-  end
-  if options[:cmd_filename].nil?
-    required.push("--cmd")
-  end
-  if options[:in_filename].nil?
-    required.push("--in")
-  end
-  if !required.empty?
-    puts "error: the following arguments are required: #{required.join(', ')}"
-    exit
-  end
-end
+class HRMOptionParser
+  attr_accessor :init_filename, :cmd_filename, :in_filename, :verbose
 
-def check_file(filename)
-  if !File.exist?(filename)
-    puts format("%s not found", filename)
-    exit
+  def initialize
+    @init_filename = nil
+    @cmd_filename = nil
+    @in_filename = nil
+    @verbose = false
   end
-end
 
-if __FILE__ == $0
-  options = {
-    :init_filename => nil, :cmd_filename => nil, :in_filename => nil,
-    :verbose => false
-  }
+  def parse!
+    parser = OptionParser.new do |opts|
+      opts.banner = "Usage: interpreter.rb [options]"
 
-  parser = OptionParser.new do |opts|
-    opts.banner = "Usage: interpreter.rb [options]"
+      opts.on('-n', '--init init_filename', 'Init filename') do |init_filename|
+        @init_filename = init_filename
+      end
 
-    opts.on('-n', '--init init_filename', 'Init filename') do |init_filename|
-      options[:init_filename] = init_filename
+      opts.on('-c', '--cmd cmd_filename', 'Commands filename') do |cmd_filename|
+        @cmd_filename = cmd_filename
+      end
+
+      opts.on('-i', '--in in_filename', 'Inputs filename') do |in_filename|
+        @in_filename = in_filename
+      end
+
+      opts.on('-v', '--verbose', 'Verbose') do
+        @verbose = true
+      end
+
+      opts.on('-h', '--help', 'Help') do
+        puts opts
+        exit
+      end
     end
 
-    opts.on('-c', '--cmd cmd_filename', 'Commands filename') do |cmd_filename|
-      options[:cmd_filename] = cmd_filename
-    end
+    parser.parse!
 
-    opts.on('-i', '--in in_filename', 'Inputs filename') do |in_filename|
-      options[:in_filename] = in_filename
-    end
+    check_required
 
-    opts.on('-v', '--verbose', 'Verbose') do
-      options[:verbose] = true
-    end
+    check_file
+  end
 
-    opts.on('-h', '--help', 'Help') do
-      puts opts
+  def check_required
+    required = []
+    if @init_filename.nil?
+      required.push("--init")
+    end
+    if @cmd_filename.nil?
+      required.push("--cmd")
+    end
+    if @in_filename.nil?
+      required.push("--in")
+    end
+    if !required.empty?
+      puts "error: the following arguments are required: #{required.join(', ')}"
       exit
     end
   end
 
+  def check_file
+    [@init_filename, @cmd_filename, @in_filename].each do |filename|
+      if !File.exist?(filename)
+        puts format("%s not found", filename)
+        exit
+      end
+    end
+  end
+end
+
+if __FILE__ == $0
+  parser = HRMOptionParser.new
   parser.parse!
-
-  check_required(options)
-
-  check_file(options[:init_filename])
-  check_file(options[:cmd_filename])
-  check_file(options[:in_filename])
-  verbose = options[:verbose]
-
   interpreter = HRMInterpreter.new
-  interpreter.verbose = verbose
+  interpreter.verbose = parser.verbose
 
-  memspace, constants = interpreter.read_init(options[:init_filename])
-  commands = interpreter.read_commands(options[:cmd_filename])
-  inputs = interpreter.read_inputs(options[:in_filename])
+  memspace, constants = interpreter.read_init(parser.init_filename)
+  commands = interpreter.read_commands(parser.cmd_filename)
+  inputs = interpreter.read_inputs(parser.in_filename)
 end 
