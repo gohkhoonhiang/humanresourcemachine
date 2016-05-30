@@ -133,7 +133,13 @@ class HRMInterpreter
   end
 
   def get_val_from_mem(i)
+    i = i.to_i if i.instance_of?(String)
     @mem[i]
+  end
+
+  def set_val_to_mem(i, val)
+    i = i.to_i if i.instance_of?(String)
+    @mem[i] = val
   end
 
   def get_raw_val(val)
