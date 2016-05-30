@@ -159,6 +159,10 @@ class HRMInterpreter
     puts format("Error: %s", line)
   end
 
+  def print_warn(line)
+    puts format("Warning: %s", line)
+  end
+
   def to_s
     print @mem
     puts
