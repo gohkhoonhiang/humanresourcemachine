@@ -4,16 +4,23 @@ require 'optparse'
 
 class HRMInterpreter
   attr_accessor :verbose
-  attr_reader :memspace, :mem, :constants, :commands, :inputs, :labels
+  attr_reader :memspace, :mem, :constants, :commands, :inputs, :labels,
+              :outputs
 
-  def initialize
-    @verbose = false
+  def initialize(parser)
+    @verbose = parser.verbose
     @memspace = 0
     @mem = []
     @constants = []
     @commands = []
     @inputs = []
     @labels = {}
+    @outputs = []
+    read_init(parser.init_filename)
+    read_commands(parser.cmd_filename)
+    read_inputs(parser.in_filename)
+    init_vm
+    init_labels
   end
 
   def init_vm
@@ -224,14 +231,7 @@ end
 if __FILE__ == $0
   parser = HRMOptionParser.new
   parser.parse!
-  interpreter = HRMInterpreter.new
-  interpreter.verbose = parser.verbose
-
-  interpreter.read_init(parser.init_filename)
-  interpreter.read_commands(parser.cmd_filename)
-  interpreter.read_inputs(parser.in_filename)
-  interpreter.init_vm
-  interpreter.init_labels
+  interpreter = HRMInterpreter.new(parser)
 
   print interpreter.to_s
 end 
