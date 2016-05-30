@@ -62,7 +62,7 @@ class HRMInterpreter
   def read_commands(file_name)
     print_log("read_commands...")
     @commands = File.readlines(file_name)
-    @commands.each { |cmd| cmd.sub!("\t", " ") }
+    @commands.each { |cmd| cmd.strip! }
   end
 
   def read_inputs(file_name)
