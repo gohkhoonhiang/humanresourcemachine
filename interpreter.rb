@@ -164,17 +164,19 @@ class HRMInterpreter
   end
 
   def to_s
-    print @mem
+    print "mem: ", @mem
     puts
-    print @memspace
+    print "memspace: ", @memspace
     puts
-    print @constants
+    print "constants: ", @constants
     puts
-    print @inputs
+    print "inputs: ", @inputs
     puts
-    print @commands
+    print "commands: ", @commands
     puts
-    print @labels
+    print "labels: ", @labels
+    puts
+    print "outputs: ", @outputs
     puts
   end
 end
