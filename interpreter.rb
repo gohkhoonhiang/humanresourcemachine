@@ -73,35 +73,46 @@ class HRMInterpreter
   end
 
   def add_raw(left, right)
-    lm = left.match(/\d+/)
-    rm = right.match(/\d+/)
-    if lm.nil? or rm.nil?
+    if left.instance_of?(String) && right.instance_of?(String)
       print_error(format("Unable to add values of non-integer types"))
       exit
     end
-    left.to_i + right.to_i
+    left + right
   end
 
   def sub_raw(left, right)
     result = 0
-    lm = left.match(/[^\d]+/)
-    rm = right.match(/[^\d]+/)
-    if lm.nil? and rm.nil?
-      result = left.to_i - right.to_i
-    elsif !lm.nil? and !rm.nil?
-      result = left.ord - right.ord
-    else
-      print_error(format("Unable to sub values of different types"))
+    if left.class != right.class
+      print_error(format("Unable to sub values of different types %s, %s",
+                          left.class, right.class))
       exit
+    elsif left.instance_of?(Fixnum) && right.instance_of?(Fixnum)
+      result = left - right
+    elsif left.instance_of?(String) && right.instance_of?(String)
+      lm = left.match(/[^\d]+/)
+      rm = right.match(/[^\d]+/)
+      if lm.nil? and rm.nil?
+        result = left.to_i - right.to_i
+      elsif !lm.nil? and !rm.nil?
+        result = left.ord - right.ord
+      else
+        print_error(format("Unable to sub values of different types %s, %s",
+                            left.class, right.class))
+        exit
+      end
     end
     result
   end
 
   def cmp_raw(left, op, right)
-    lm = left.match(/[^\d]+/)
-    rm = right.match(/[^\d]+/)
-    left = lm.nil? ? left.to_i : left.ord
-    right = rm.nil? ? right.to_i : right.ord
+    if left.instance_of?(String)
+      lm = left.match(/[^\d]+/)
+      left = lm.nil? ? left.to_i : left.ord
+    end
+    if right.instance_of?(String)
+      rm = right.match(/[^\d]+/)
+      right = rm.nil? ? right.to_i : right.ord
+    end
     compare(left, op, right)
   end
 
