@@ -282,20 +282,16 @@ module HRM
     end
 
     def to_s
-      print "mem: ", @mem
-      puts
-      print "memspace: ", @memspace
-      puts
-      print "constants: ", @constants
-      puts
-      print "inputs: ", @inputs
-      puts
-      print "commands: ", @commands
-      puts
-      print "labels: ", @labels
-      puts
-      print "outputs: ", @outputs
-      puts
+      output = <<-OUTPUT
+      mem: #{mem}
+      memspace: #{memspace}
+      constants: #{constants}
+      inputs: #{inputs}
+      commands: #{commands}
+      labels: #{labels}
+      outputs: #{outputs}
+      OUTPUT
+      puts output
     end
   end
 end
