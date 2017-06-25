@@ -1,8 +1,7 @@
 module HRM
   class Interpreter
-    attr_accessor :verbose
-    attr_reader :memspace, :mem, :constants, :commands, :inputs, :labels,
-                :outputs
+    attr_reader :verbose, :memspace, :mem, :constants, :commands, :inputs,
+                :labels, :outputs
 
     def initialize(init_filename, cmd_filename, in_filename, verbose = true)
       @verbose = verbose
@@ -23,7 +22,7 @@ module HRM
     def init_vm
       print_log("init vm...")
       print_log(format("memspace: %d", @memspace))
-      @mem = [nil] * @memspace
+      @mem = Array.new(@memspace)
       index = @memspace - 1
       @constants.each do |const|
         @mem[index] = const
@@ -34,12 +33,11 @@ module HRM
     end
 
     def init_labels
-      @commands.each_with_index do |cmd,index|
+      @commands.each_with_index do |cmd, index|
         m = cmd.match(/(?<label>\w+):/)
-        if !m.nil?
-          lbl = m['label']
-          @labels[lbl] = index
-        end
+        next if m.nil?
+        lbl = m['label']
+        @labels[lbl] = index
       end
       print_log(format("labels: %s", labels))
       print_log("init labels done...")
@@ -197,7 +195,7 @@ module HRM
     end
 
     def add_raw(left, right)
-      if left.instance_of?(String) && right.instance_of?(String)
+      if left.is_a?(String) && right.is_a?(String)
         print_error(format("Unable to add values of non-integer types"))
         exit
       end
@@ -210,9 +208,9 @@ module HRM
         print_error(format("Unable to sub values of different types %s, %s",
                             left.class, right.class))
         exit
-      elsif left.instance_of?(Fixnum) && right.instance_of?(Fixnum)
+      elsif left.is_a?(Fixnum) && right.is_a?(Fixnum)
         result = left - right
-      elsif left.instance_of?(String) && right.instance_of?(String)
+      elsif left.is_a?(String) && right.is_a?(String)
         lm = left.match(/[^\d]+/)
         rm = right.match(/[^\d]+/)
         if lm.nil? and rm.nil?
@@ -229,11 +227,11 @@ module HRM
     end
 
     def cmp_raw(left, op, right)
-      if left.instance_of?(String)
+      if left.is_a?(String)
         lm = left.match(/[^\d]+/)
         left = lm.nil? ? left.to_i : left.ord
       end
-      if right.instance_of?(String)
+      if right.is_a?(String)
         rm = right.match(/[^\d]+/)
         right = rm.nil? ? right.to_i : right.ord
       end
@@ -257,22 +255,18 @@ module HRM
     end
 
     def get_val_from_mem(i)
-      i = i.to_i if i.instance_of?(String)
+      i = i.to_i if i.is_a?(String)
       @mem[i]
     end
 
     def set_val_to_mem(i, val)
-      i = i.to_i if i.instance_of?(String)
+      i = i.to_i if i.is_a?(String)
       @mem[i] = val
     end
 
     def get_raw_val(val)
-      raw_val = if !val.nil?
-                  !val.match(/\d+/).nil? ? val.to_i : val
-                else
-                  nil
-                end
-      raw_val
+      return if val.nil?
+      val.match(/\d+/).nil? ? val : val.to_i
     end
 
     def print_log(line)
