@@ -1,75 +1,21 @@
+require_relative './logger'
+require_relative './machine_state'
+
 module HRM
   class Interpreter
-    attr_reader :verbose, :memspace, :mem, :constants, :commands, :inputs,
-                :labels, :outputs
+
+    attr_reader :machine_state, :logger
 
     def initialize(init_filename, cmd_filename, in_filename, verbose = true)
       @verbose = verbose
-      @memspace = 0
-      @mem = []
-      @constants = []
-      @commands = []
-      @inputs = []
-      @labels = {}
-      @outputs = []
-      read_init(init_filename)
-      read_commands(cmd_filename)
-      read_inputs(in_filename)
-      init_vm
-      init_labels
-    end
-
-    def init_vm
-      print_log("init vm...")
-      print_log(format("memspace: %d", @memspace))
-      @mem = Array.new(@memspace)
-      index = @memspace - 1
-      @constants.each do |const|
-        @mem[index] = const
-        index = index - 1
-      end
-      print_log(format("mem: %s", @mem))
-      print_log("init done...")
-    end
-
-    def init_labels
-      @commands.each_with_index do |cmd, index|
-        m = cmd.match(/(?<label>\w+):/)
-        next if m.nil?
-        lbl = m['label']
-        @labels[lbl] = index
-      end
-      print_log(format("labels: %s", labels))
-      print_log("init labels done...")
-    end
-
-    def read_init(file_name)
-      print_log("read_init...")
-      lines = []
-      lines = File.readlines(file_name)
-      @memspace = lines.first.strip.to_i
-      @memspace = get_raw_val(lines.first.strip)
-      if lines.length == 2
-        lines[1].strip.split(" ").each { |val| @constants.push(get_raw_val(val)) }
-      end
-    end
-
-    def read_commands(file_name)
-      print_log("read_commands...")
-      @commands = File.readlines(file_name)
-      @commands.each { |cmd| cmd.strip! }
-    end
-
-    def read_inputs(file_name)
-      print_log("read_inputs...")
-      line = ""
-      line = File.read(file_name)
-      line.strip.split(" ").each { |val| @inputs.push(get_raw_val(val)) }
+      @logger = ::HRM::Logger.new(verbose)
+      @machine_state = ::HRM::MachineState.new(logger)
+      @machine_state.configure(init_filename, cmd_filename, in_filename)
     end
 
     def interpret
       steps = 0
-      print_log("interpreting...")
+      logger.info("interpreting...")
       inb = Regexp.new(/INBOX/)
       oub = Regexp.new(/OUTBOX/)
       eof = Regexp.new(/END/)
@@ -86,18 +32,18 @@ module HRM
       ptr = 0
       x = nil
       finished = false
-      while !finished && ptr >= 0 && ptr < commands.length do
-        print_log(format("mem: %s", @mem))
-        cmd = @commands[ptr]
-        print_log(format("interpreting commands[%d]: %s", ptr, cmd))
+      while !finished && ptr >= 0 && ptr < machine_state.commands.length do
+        logger.info(format("mem: %s", machine_state.mem))
+        cmd = machine_state.commands[ptr]
+        logger.info(format("interpreting commands[%d]: %s", ptr, cmd))
         if cmd.match(inb)
-          if @inputs.empty?
+          if machine_state.inputs.empty?
             finished = true
           else
-            x = inputs.delete_at(0)
+            x = machine_state.inputs.delete_at(0)
           end
         elsif cmd.match(oub)
-          @outputs.push(x)
+          machine_state.outputs.push(x)
           x = nil
         elsif cmd.match(add)
           m = cmd.match(add)
@@ -123,18 +69,18 @@ module HRM
           unless !cmp_raw(x, "eq", 0)
             m = cmd.match(jpz)
             label = m['label']
-            ptr = @labels[label]
+            ptr = machine_state.labels[label]
           end
         elsif cmd.match(jpn)
           unless !cmp_raw(x, "lt", 0)
             m = cmd.match(jpn)
             label = m['label']
-            ptr = @labels[label]
+            ptr = machine_state.labels[label]
           end
         elsif cmd.match(jmp)
           m = cmd.match(jmp)
           label = m['label']
-          ptr = @labels[label]
+          ptr = machine_state.labels[label]
         elsif cmd.match(bup)
           m = cmd.match(bup)
           if !m['addr'].nil?
@@ -184,19 +130,19 @@ module HRM
         elsif cmd.match(lbl)
           # label
         else
-          print_warn(format("Ignore command %s", cmd))
+          logger.warn(format("Ignore command %s", cmd))
         end
         ptr += 1
         steps += 1
-        print_log(format("ptr: %d", ptr))
+        logger.info(format("ptr: %d", ptr))
       end
-      print_log(format("interpreted in %d steps with %d commands",
-                        steps, @commands.length))
+      logger.info(format("interpreted in %d steps with %d commands",
+                         steps, machine_state.commands.length))
     end
 
     def add_raw(left, right)
       if left.is_a?(String) && right.is_a?(String)
-        print_error(format("Unable to add values of non-integer types"))
+        logger.error(format("Unable to add values of non-integer types"))
         exit
       end
       left + right
@@ -205,7 +151,7 @@ module HRM
     def sub_raw(left, right)
       result = 0
       if left.class != right.class
-        print_error(format("Unable to sub values of different types %s, %s",
+        logger.error(format("Unable to sub values of different types %s, %s",
                             left.class, right.class))
         exit
       elsif left.is_a?(Fixnum) && right.is_a?(Fixnum)
@@ -218,7 +164,7 @@ module HRM
         elsif !lm.nil? and !rm.nil?
           result = left.ord - right.ord
         else
-          print_error(format("Unable to sub values of different types %s, %s",
+          logger.error(format("Unable to sub values of different types %s, %s",
                               left.class, right.class))
           exit
         end
@@ -248,7 +194,7 @@ module HRM
         when "lte" then left <= right
         when "gte" then left >= right
         else
-          print_error(format("Invalid operation %s", op))
+          logger.error(format("Invalid operation %s", op))
           exit
         end
       result
@@ -256,40 +202,23 @@ module HRM
 
     def get_val_from_mem(i)
       i = i.to_i if i.is_a?(String)
-      @mem[i]
+      machine_state.mem[i]
     end
 
     def set_val_to_mem(i, val)
       i = i.to_i if i.is_a?(String)
-      @mem[i] = val
-    end
-
-    def get_raw_val(val)
-      return if val.nil?
-      val.match(/\d+/).nil? ? val : val.to_i
-    end
-
-    def print_log(line)
-      puts line if verbose
-    end
-
-    def print_error(line)
-      puts format("Error: %s", line)
-    end
-
-    def print_warn(line)
-      puts format("Warning: %s", line)
+      machine_state.mem[i] = val
     end
 
     def to_s
       output = <<-OUTPUT
-      mem: #{mem}
-      memspace: #{memspace}
-      constants: #{constants}
-      inputs: #{inputs}
-      commands: #{commands}
-      labels: #{labels}
-      outputs: #{outputs}
+      mem: #{machine_state.mem}
+      memspace: #{machine_state.memspace}
+      constants: #{machine_state.constants}
+      inputs: #{machine_state.inputs}
+      commands: #{machine_state.commands}
+      labels: #{machine_state.labels}
+      outputs: #{machine_state.outputs}
       OUTPUT
       puts output
     end
