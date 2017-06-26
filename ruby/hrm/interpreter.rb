@@ -49,21 +49,21 @@ module HRM
           m = cmd.match(add)
           if !m['addr'].nil?
             addr = m['addr']
-            i = get_val_from_mem(addr)
-            x = add_raw(x, get_val_from_mem(i))
+            i = machine_state.get_val_from_mem(addr)
+            x = add_raw(x, machine_state.get_val_from_mem(i))
           else
             i = m['index']
-            x = add_raw(x, get_val_from_mem(i))
+            x = add_raw(x, machine_state.get_val_from_mem(i))
           end
         elsif cmd.match(sub)
           m = cmd.match(sub)
           if !m['addr'].nil?
             addr = m['addr']
-            i = get_val_from_mem(addr)
-            x = sub_raw(x, get_val_from_mem(i))
+            i = machine_state.get_val_from_mem(addr)
+            x = sub_raw(x, machine_state.get_val_from_mem(i))
           else
             i = m['index']
-            x = sub_raw(x, get_val_from_mem(i))
+            x = sub_raw(x, machine_state.get_val_from_mem(i))
           end
         elsif cmd.match(jpz)
           unless !cmp_raw(x, "eq", 0)
@@ -85,45 +85,45 @@ module HRM
           m = cmd.match(bup)
           if !m['addr'].nil?
             addr = m['addr']
-            i = get_val_from_mem(addr)
-            set_val_to_mem(i, add_raw(get_val_from_mem(i), 1))
-            x = get_val_from_mem(i)
+            i = machine_state.get_val_from_mem(addr)
+            machine_state.set_val_to_mem(i, add_raw(machine_state.get_val_from_mem(i), 1))
+            x = machine_state.get_val_from_mem(i)
           else
             i = m['index']
-            set_val_to_mem(i, add_raw(get_val_from_mem(i), 1))
-            x = get_val_from_mem(i)
+            machine_state.set_val_to_mem(i, add_raw(machine_state.get_val_from_mem(i), 1))
+            x = machine_state.get_val_from_mem(i)
           end
         elsif cmd.match(bdn)
           m = cmd.match(bdn)
           if !m['addr'].nil?
             addr = m['addr']
-            i = get_val_from_mem(addr)
-            set_val_to_mem(i, sub_raw(get_val_from_mem(i), 1))
-            x = get_val_from_mem(i)
+            i = machine_state.get_val_from_mem(addr)
+            machine_state.set_val_to_mem(i, sub_raw(machine_state.get_val_from_mem(i), 1))
+            x = machine_state.get_val_from_mem(i)
           else
             i = m['index']
-            set_val_to_mem(i, sub_raw(get_val_from_mem(i), 1))
-            x = get_val_from_mem(i)
+            machine_state.set_val_to_mem(i, sub_raw(machine_state.get_val_from_mem(i), 1))
+            x = machine_state.get_val_from_mem(i)
           end
         elsif cmd.match(cpt)
           m = cmd.match(cpt)
           if !m['addr'].nil?
             addr = m['addr']
-            i = get_val_from_mem(addr)
-            set_val_to_mem(i, x)
+            i = machine_state.get_val_from_mem(addr)
+            machine_state.set_val_to_mem(i, x)
           else
             i = m['index']
-            set_val_to_mem(i, x)
+            machine_state.set_val_to_mem(i, x)
           end
         elsif cmd.match(cpf)
           m = cmd.match(cpf)
           if !m['addr'].nil?
             addr = m['addr']
-            i = get_val_from_mem(addr)
-            x = get_val_from_mem(i)
+            i = machine_state.get_val_from_mem(addr)
+            x = machine_state.get_val_from_mem(i)
           else
             i = m['index']
-            x = get_val_from_mem(i)
+            x = machine_state.get_val_from_mem(i)
           end
         elsif cmd.match(eof)
           finished = true
@@ -198,16 +198,6 @@ module HRM
           exit
         end
       result
-    end
-
-    def get_val_from_mem(i)
-      i = i.to_i if i.is_a?(String)
-      machine_state.mem[i]
-    end
-
-    def set_val_to_mem(i, val)
-      i = i.to_i if i.is_a?(String)
-      machine_state.mem[i] = val
     end
 
     def to_s

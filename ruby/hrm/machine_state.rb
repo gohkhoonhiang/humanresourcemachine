@@ -76,5 +76,15 @@ module HRM
       val.match(/\d+/).nil? ? val : val.to_i
     end
 
+    def get_val_from_mem(i)
+      i = i.to_i if i.is_a?(String)
+      @mem[i]
+    end
+
+    def set_val_to_mem(i, val)
+      i = i.to_i if i.is_a?(String)
+      @mem[i] = val
+    end
+
   end
 end
