@@ -1,5 +1,6 @@
 require_relative './logger'
 require_relative './machine_state'
+require_relative './operator'
 
 module HRM
   class Interpreter
@@ -50,29 +51,29 @@ module HRM
           if !m['addr'].nil?
             addr = m['addr']
             i = machine_state.get_val_from_mem(addr)
-            x = add_raw(x, machine_state.get_val_from_mem(i))
+            x = ::HRM::Operator.add_raw(x, machine_state.get_val_from_mem(i))
           else
             i = m['index']
-            x = add_raw(x, machine_state.get_val_from_mem(i))
+            x = ::HRM::Operator.add_raw(x, machine_state.get_val_from_mem(i))
           end
         elsif cmd.match(sub)
           m = cmd.match(sub)
           if !m['addr'].nil?
             addr = m['addr']
             i = machine_state.get_val_from_mem(addr)
-            x = sub_raw(x, machine_state.get_val_from_mem(i))
+            x = ::HRM::Operator.sub_raw(x, machine_state.get_val_from_mem(i))
           else
             i = m['index']
-            x = sub_raw(x, machine_state.get_val_from_mem(i))
+            x = ::HRM::Operator.sub_raw(x, machine_state.get_val_from_mem(i))
           end
         elsif cmd.match(jpz)
-          unless !cmp_raw(x, "eq", 0)
+          unless !::HRM::Operator.cmp_raw(x, "eq", 0)
             m = cmd.match(jpz)
             label = m['label']
             ptr = machine_state.labels[label]
           end
         elsif cmd.match(jpn)
-          unless !cmp_raw(x, "lt", 0)
+          unless !::HRM::Operator.cmp_raw(x, "lt", 0)
             m = cmd.match(jpn)
             label = m['label']
             ptr = machine_state.labels[label]
@@ -86,11 +87,11 @@ module HRM
           if !m['addr'].nil?
             addr = m['addr']
             i = machine_state.get_val_from_mem(addr)
-            machine_state.set_val_to_mem(i, add_raw(machine_state.get_val_from_mem(i), 1))
+            machine_state.set_val_to_mem(i, ::HRM::Operator.add_raw(machine_state.get_val_from_mem(i), 1))
             x = machine_state.get_val_from_mem(i)
           else
             i = m['index']
-            machine_state.set_val_to_mem(i, add_raw(machine_state.get_val_from_mem(i), 1))
+            machine_state.set_val_to_mem(i, ::HRM::Operator.add_raw(machine_state.get_val_from_mem(i), 1))
             x = machine_state.get_val_from_mem(i)
           end
         elsif cmd.match(bdn)
@@ -98,11 +99,11 @@ module HRM
           if !m['addr'].nil?
             addr = m['addr']
             i = machine_state.get_val_from_mem(addr)
-            machine_state.set_val_to_mem(i, sub_raw(machine_state.get_val_from_mem(i), 1))
+            machine_state.set_val_to_mem(i, ::HRM::Operator.sub_raw(machine_state.get_val_from_mem(i), 1))
             x = machine_state.get_val_from_mem(i)
           else
             i = m['index']
-            machine_state.set_val_to_mem(i, sub_raw(machine_state.get_val_from_mem(i), 1))
+            machine_state.set_val_to_mem(i, ::HRM::Operator.sub_raw(machine_state.get_val_from_mem(i), 1))
             x = machine_state.get_val_from_mem(i)
           end
         elsif cmd.match(cpt)
@@ -138,66 +139,6 @@ module HRM
       end
       logger.info(format("interpreted in %d steps with %d commands",
                          steps, machine_state.commands.length))
-    end
-
-    def add_raw(left, right)
-      if left.is_a?(String) && right.is_a?(String)
-        logger.error(format("Unable to add values of non-integer types"))
-        exit
-      end
-      left + right
-    end
-
-    def sub_raw(left, right)
-      result = 0
-      if left.class != right.class
-        logger.error(format("Unable to sub values of different types %s, %s",
-                            left.class, right.class))
-        exit
-      elsif left.is_a?(Fixnum) && right.is_a?(Fixnum)
-        result = left - right
-      elsif left.is_a?(String) && right.is_a?(String)
-        lm = left.match(/[^\d]+/)
-        rm = right.match(/[^\d]+/)
-        if lm.nil? and rm.nil?
-          result = left.to_i - right.to_i
-        elsif !lm.nil? and !rm.nil?
-          result = left.ord - right.ord
-        else
-          logger.error(format("Unable to sub values of different types %s, %s",
-                              left.class, right.class))
-          exit
-        end
-      end
-      result
-    end
-
-    def cmp_raw(left, op, right)
-      if left.is_a?(String)
-        lm = left.match(/[^\d]+/)
-        left = lm.nil? ? left.to_i : left.ord
-      end
-      if right.is_a?(String)
-        rm = right.match(/[^\d]+/)
-        right = rm.nil? ? right.to_i : right.ord
-      end
-      compare(left, op, right)
-    end
-
-    def compare(left, op, right)
-      result =
-        case op
-        when "eq" then left == right
-        when "ne" then left != right
-        when "lt" then left < right
-        when "gt" then left > right
-        when "lte" then left <= right
-        when "gte" then left >= right
-        else
-          logger.error(format("Invalid operation %s", op))
-          exit
-        end
-      result
     end
 
     def to_s
