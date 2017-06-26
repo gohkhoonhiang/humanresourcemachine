@@ -1,4 +1,5 @@
 require_relative './command_regex'
+require_relative '../operator'
 
 module HRM
   module Command

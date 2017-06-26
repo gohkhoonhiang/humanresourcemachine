@@ -1,6 +1,5 @@
 require_relative './logger'
 require_relative './machine_state'
-require_relative './operator'
 require_relative './command_matcher'
 
 module HRM
@@ -10,8 +9,8 @@ module HRM
 
     def initialize(init_filename, cmd_filename, in_filename, verbose = true)
       @verbose = verbose
-      @logger = ::HRM::Logger.new(verbose)
-      @machine_state = ::HRM::MachineState.new(logger)
+      @logger = Logger.new(verbose)
+      @machine_state = MachineState.new(logger)
       @machine_state.configure(init_filename, cmd_filename, in_filename)
     end
 
@@ -22,7 +21,7 @@ module HRM
         logger.info(format("mem: %s", machine_state.mem))
         cmd = machine_state.next_command
 
-        machine_command = ::HRM::CommandMatcher.match(cmd)
+        machine_command = CommandMatcher.match(cmd)
         if machine_command
           machine_command.execute(machine_state)
         else
