@@ -66,6 +66,8 @@ is a valid format.
 
 # Running the Interpreter
 
+## Python
+
 To run, you must provide all 3 files as arguments to the program.
 
 For example:
@@ -78,6 +80,36 @@ To print the memory allocation and instructions being run in the process, set th
 
 ```
 ./interpreter.py --init init_vm.txt --cmd commands.txt --input inputs.txt -v
+```
+
+Otherwise, the interpreter will just print the input and output.
+
+## Ruby
+
+There are 2 ways to run the Ruby interpreter:
+
+### IRB
+
+1. Open `irb` in the `ruby/hrm` directory.
+
+2. Run command `load 'app.rb'`.
+
+3. Run command `HRM::App.interpret(init_filename, commands_filename, inputs_filename)`.
+
+### Command Line
+
+To run, you must provide all 3 files as arguments to the program.
+
+For example:
+
+```
+./hrm_cli.rb --init init_vm.txt --cmd commands.txt --input inputs.txt
+```
+
+To print the memory allocation and instructions being run in the process, set the `-v` flag:
+
+```
+./hrm_cli.rb --init init_vm.txt --cmd commands.txt --input inputs.txt -v
 ```
 
 Otherwise, the interpreter will just print the input and output.
