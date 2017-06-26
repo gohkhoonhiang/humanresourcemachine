@@ -75,6 +75,14 @@ module HRM
       logger.info("init labels done...")
     end
 
+    def terminate?
+      finished || ptr < 0 || ptr >= commands.length
+    end
+
+    def next_command
+      commands[ptr]
+    end
+
     def get_raw_val(val)
       return if val.nil?
       val.match(/\d+/).nil? ? val : val.to_i

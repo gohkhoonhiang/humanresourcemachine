@@ -18,9 +18,9 @@ module HRM
     def interpret
       steps = 0
       logger.info("interpreting...")
-      while !machine_state.finished && machine_state.ptr >= 0 && machine_state.ptr < machine_state.commands.length do
+      while !machine_state.terminate? do
         logger.info(format("mem: %s", machine_state.mem))
-        cmd = machine_state.commands[machine_state.ptr]
+        cmd = machine_state.next_command
 
         machine_command = ::HRM::CommandMatcher.match(cmd)
         if machine_command
