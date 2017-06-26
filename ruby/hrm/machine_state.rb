@@ -1,8 +1,9 @@
 module HRM
   class MachineState
 
-    attr_reader :memspace, :mem, :constants, :commands, :inputs,
-                :labels, :outputs, :logger
+    attr_accessor :ptr, :x, :finished
+    attr_reader :memspace, :mem, :constants, :commands, :inputs, :labels,
+                :outputs, :logger
 
     def initialize(logger)
       @memspace = 0
@@ -12,6 +13,9 @@ module HRM
       @inputs = []
       @labels = {}
       @outputs = []
+      @ptr = 0
+      @x = nil
+      @finished = false
       @logger = logger
     end
 
