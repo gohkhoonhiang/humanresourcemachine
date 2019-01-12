@@ -1,0 +1,62 @@
+-- Sorting --
+-- HUMAN RESOURCE MACHINE PROGRAM --
+
+a:
+    COPYFROM 24
+    COPYTO   20
+b:
+    INBOX   
+    COPYTO   [20]
+    JUMPZ    c
+    BUMPUP   20
+    JUMP     b
+c:
+    JUMP     i
+    COMMENT  0
+d:
+e:
+    COPYFROM [21]
+    JUMPZ    h
+    COPYFROM [20]
+    SUB      [21]
+    JUMPN    f
+    JUMPZ    g
+    COMMENT  3
+    COPYFROM [20]
+    COPYTO   22
+    COPYFROM [21]
+    COPYTO   [20]
+    COPYFROM 22
+    COPYTO   [21]
+    BUMPUP   23
+f:
+    COMMENT  1
+g:
+    COMMENT  2
+    BUMPUP   20
+    BUMPUP   21
+    JUMP     e
+h:
+    COPYFROM 23
+    JUMPZ    j
+i:
+    COMMENT  4
+    COPYFROM 24
+    COPYTO   23
+    COPYTO   20
+    COPYTO   21
+    BUMPUP   21
+    JUMP     d
+j:
+    COMMENT  5
+    COPYFROM 24
+    COPYTO   20
+k:
+    COPYFROM [20]
+    JUMPZ    l
+    OUTBOX  
+    BUMPUP   20
+    JUMP     k
+l:
+    JUMP     a
+    END

@@ -1,0 +1,41 @@
+a:
+    COMMENT  0
+    COPYFROM 9
+    COPYTO   2
+    COPYTO   3
+    INBOX   
+    COPYTO   0
+    COMMENT  1
+b:
+    COPYFROM 0
+    SUB      11
+    JUMPN    c
+    COPYTO   0
+    BUMPUP   3
+    JUMP     b
+c:
+    COMMENT  2
+d:
+    COPYFROM 0
+    SUB      10
+    JUMPN    e
+    COPYTO   0
+    BUMPUP   2
+    JUMP     d
+e:
+    COPYFROM 3
+    JUMPZ    f
+    OUTBOX  
+    COPYFROM 2
+    OUTBOX  
+    JUMP     h
+f:
+    COPYFROM 2
+    JUMPZ    g
+    OUTBOX  
+g:
+h:
+    COPYFROM 0
+    OUTBOX  
+    JUMP     a
+    END

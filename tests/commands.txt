@@ -1,0 +1,20 @@
+-- HUMAN RESOURCE MACHINE PROGRAM --
+
+    INBOX   
+    OUTBOX  
+    INBOX   
+    OUTBOX  
+    INBOX   
+    OUTBOX  
+    END
+
+DEFINE COMMENT 0
+eJyrZ2BgkOZ8oCHNOWUVkMlwkOuhJpvgIy0vcX7veeJ6iT9EbbJDhd2K1gt6lhzh9Cr1EvcseSfpWz5F
+OrCqTzamyVS+ZLKpfNuCd5KTVy4Xmb5GgHfaapA5p9X0k06rZfXIaFRMO6zZOEdEu2nubp3qGZGGTvlr
+DS0yAk2qpi8wg6g1tr+pbGwf3XjToW4WiN/kaJ0l5mWTHevvXBAa5FW6MsivIjwwrTPer2JagUfr/ArX
+tgUgdZ/DHmp+DtOOfx25bPvryIppU6Ii6vtirLOM4nUTLiRrxCqlaseXpDnklaTl9V9OapzTGde/DKQv
+Lu+2alyeVylLQe9SEN+tPL2roTG9q7Ypqe18s1/F+WaLDLVmw+TrDcqRHXXyYZOq5MNmVGjFvS83S3eu
+aFtgVrtka2v96l1XGtfuAennWvvLWmbZL2ulJX9tGxewunTOFfU3nasQbjRPJUpquXVW2iqvUp41EfVc
+ayum7VjdOl9m2bTVlYtnr38wZ+FmkH67ndZZxnutsy4edCsqOhpRn3Uirz/rROOcgmMTllccnrvh+v6l
+2zr2rthhuXvZ9lc7Jq903l4wYcZ22xyQ3vXn7HPXn2tbEHph6baVFyYsX3O+eBLDBd/yz1csM52um6aB
+1Ojfcyta+86taNEn7zIQP+f5O6Oc59sPM4yCUQAEAHNA0mU;
